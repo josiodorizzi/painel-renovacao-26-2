@@ -64,6 +64,18 @@ summary.state-row .muted{font-size:15px!important}
 .hit100-icon{font-size:17px;line-height:1;flex:0 0 auto}
 .hit100-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
 .hit100-pct{font-size:13px;color:#16845b;white-space:nowrap}
+
+.hit100-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:8px 12px;margin-top:8px}
+.hit100-item{display:block;min-width:0;padding:8px 10px;border:1px solid #e5f1e9;border-radius:9px;background:#fbfffc}
+.hit100-heading{display:flex;align-items:center;gap:7px;min-width:0}
+.hit100-icon{font-size:17px;line-height:1;flex:0 0 auto}
+.hit100-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;font-size:13px}
+.hit100-pct{font-size:13px;color:#16845b;white-space:nowrap}
+.hit100-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:7px 0 0 25px}
+.hit100-metrics span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.hit100-metrics small{font-size:10px;color:#777}
+.hit100-metrics b{font-size:13px;color:#222}
+.hit100-metrics .hit100-extra b{color:#16845b}
 </style>
 <style id="ajustes-visuais-2026-11-17">
 body{font-size:16px!important}
@@ -200,7 +212,7 @@ $('topGaps').innerHTML=gaps.length?`<div class="gap-table"><div class="gap-head"
 let nearGoal=[...a].filter(x=>n(x['GAP META'])>0&&n(x['GAP META'])<10).sort((x,y)=>n(x['GAP META'])-n(y['GAP META']));
 $('smallGaps').innerHTML=nearGoal.length?`<div class="gap-table"><div class="gap-head" style="grid-template-columns:minmax(240px,2fr) 100px 110px 90px 70px;min-width:610px"><span>Polo</span><span class="gap-num">Meta</span><span class="gap-num">Renovados</span><span class="gap-num">% meta</span><span class="gap-num">GAP</span></div>${nearGoal.map(x=>{let pct=n(x['% META'])||(n(x['META EDITAL'])?n(x['REAL META'])/n(x['META EDITAL']):0);return `<div class="gap-row" style="grid-template-columns:minmax(240px,2fr) 100px 110px 90px 70px;min-width:610px"><b class="gap-name" title="${x.POLO}">${x.POLO}</b><span class="gap-num">${f(x['META EDITAL'])}</span><span class="gap-num">${f(x['REAL META'])}</span><span class="gap-pct" style="color:${pct<.95?'#c43b32':'#1b1b1b'}">${pc(pct)}</span><span class="gap-value">-${f(x['GAP META'])}</span></div>`}).join('')}</div>`:'<div class="desc">Nenhum polo com GAP entre 1 e 9 nos filtros selecionados. 🎉</div>';
 let hit=[...a].filter(x=>{let q=n(x['% META'])||((n(x['META EDITAL'])?n(x['REAL META'])/n(x['META EDITAL']):0));return q>=1}).sort((x,y)=>((n(y['% META'])||n(y['REAL META'])/Math.max(1,n(y['META EDITAL'])))-(n(x['% META'])||n(x['REAL META'])/Math.max(1,n(x['META EDITAL'])))));
-$('hit100').innerHTML=hit.length?`<div class="hit100-list">${hit.map(x=>{let q=n(x['% META'])||((n(x['META EDITAL'])?n(x['REAL META'])/n(x['META EDITAL']):0));return `<div class="hit100-item"><span class="hit100-icon" title="Meta batida" aria-label="Meta batida">🏆</span><span class="hit100-name" title="${x.POLO}">${x.POLO}</span><b class="hit100-pct">${pc(q)}</b></div>`}).join('')}</div>`:'<div class="desc">Nenhum polo atingiu 100% nos filtros selecionados.</div>';
+$('hit100').innerHTML=hit.length?`<div class="hit100-list">${hit.map(x=>{let q=n(x['% META'])||((n(x['META EDITAL'])?n(x['REAL META'])/n(x['META EDITAL']):0)),meta=n(x['META EDITAL']),ren=n(x['REAL META']),extra=Math.max(0,ren-meta);return `<div class="hit100-item"><div class="hit100-heading"><span class="hit100-icon" title="Meta batida" aria-label="Meta batida">🏆</span><span class="hit100-name" title="${x.POLO}">${x.POLO}</span><b class="hit100-pct">${pc(q)}</b></div><div class="hit100-metrics"><span><small>Meta</small><b>${f(meta)}</b></span><span><small>Renovados</small><b>${f(ren)}</b></span><span class="hit100-extra"><small>Acima da meta</small><b>+${f(extra)}</b></span></div></div>`}).join('')}</div>`:'<div class="desc">Nenhum polo atingiu 100% nos filtros selecionados.</div>';
 
 a.sort((x,y)=>{let u=x[sort],v=y[sort];return (typeof u==='number'&&typeof v==='number'?u-v:String(u??'').localeCompare(String(v??''),'pt-BR',{numeric:true}))*dir});
 $('count').textContent=`${a.length} polo(s) exibido(s) de ${D.length}`;
