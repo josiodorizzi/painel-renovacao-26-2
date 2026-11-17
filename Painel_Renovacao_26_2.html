@@ -308,19 +308,25 @@ const ownOpsMeta=sumOps(D1,'META EDITAL')+sumOps(D2,'META EDITAL');
 const ownOpsRenewed=sumOps(D1,'REAL META')+sumOps(D2,'REAL META');
 const ownOpsGap=ownOpsMeta-ownOpsRenewed;
 const ownOpsAttainment=ownOpsMeta?ownOpsRenewed/ownOpsMeta:0;
-function countBusinessDaysToYearEnd(){
- const now=new Date(), start=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1), end=new Date(now.getFullYear(),11,31);
- if(start>end)return 0;
- const holidays=new Set(now.getFullYear()===2026?['2026-11-20','2026-12-25']:[]);
+function countSelectedPeriodBusinessDays(){
+ const start=$('simStartDate').value,end=$('simEndDate').value;
+ if(!start||!end||start>end)return 0;
+ const a=new Date(start+'T12:00:00'),b=new Date(end+'T12:00:00');
+ const holidays=new Set(['2026-09-07','2026-10-12','2026-11-02','2026-11-20','2026-12-25']);
  let count=0;
- for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
-  const weekday=d.getDay(), key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+ for(let d=new Date(a);d<=b;d.setDate(d.getDate()+1)){
+  const weekday=d.getDay(),key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   if(weekday!==0&&weekday!==6&&!holidays.has(key))count++;
  }
  return count;
 }
-const ownOpsBusinessDays=countBusinessDaysToYearEnd();
-const ownOpsDaily=ownOpsGap>0&&ownOpsBusinessDays>0?Math.ceil(ownOpsGap/ownOpsBusinessDays):0;
+function updateConsolidatedDaily(){
+ const days=countSelectedPeriodBusinessDays();
+ const daily=ownOpsGap>0&&days>0?Math.ceil(ownOpsGap/days):0;
+ $('ownOpsDaily').textContent=f(daily);
+ $('ownOpsDays').textContent=days+' dias úteis no período selecionado';
+}
+
 $('ownOpsMeta').textContent=f(ownOpsMeta);
 $('ownOpsRenewed').textContent=f(ownOpsRenewed);
 $('ownOpsGap').textContent=(ownOpsGap>0?'-':ownOpsGap<0?'+':'')+f(Math.abs(ownOpsGap));
@@ -336,17 +342,7 @@ refreshFilters();
 let sort='POLO',dir=1;
 function filtered(){return D.filter(x=>(!$('code').value||String(x['CÓDIGO'])===$('code').value)&&(!$('polo').value||x.POLO===$('polo').value)&&(!$('uf').value||x.UF===$('uf').value)&&(!$('reg').value||x['REGIÃO']===$('reg').value)&&(!$('porte').value||x['PORTE POLO']===$('porte').value))}
 function simulatorBusinessDays(){
- const start=$('simStartDate').value,end=$('simEndDate').value;
- if(!start||!end||start>end)return 0;
- const a=new Date(start+'T12:00:00'),b=new Date(end+'T12:00:00');
- const year=a.getFullYear();
- const holidays=new Set(year===2026?['2026-09-07','2026-10-12','2026-11-02','2026-11-15','2026-11-20','2026-12-25']:[]);
- let days=0;
- for(let d=new Date(a);d<=b;d.setDate(d.getDate()+1)){
-  const wd=d.getDay(),key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-  if(wd!==0&&wd!==6&&!holidays.has(key))days++;
- }
- return days;
+ return countSelectedPeriodBusinessDays();
 }
 function simulator(rows,base,ren){
  let rate=Math.max(0,Math.min(100,Number($('simRate').value)||0))/100;
@@ -383,16 +379,10 @@ function updateOperationDaily(){
  const meta=D.reduce((sum,x)=>sum+n(x['META EDITAL']),0);
  const renewed=D.reduce((sum,x)=>sum+n(x['REAL META']),0);
  const gap=Math.max(0,meta-renewed);
- const now=new Date(),start=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1),end=new Date(now.getFullYear(),11,31);
- const holidays=new Set(now.getFullYear()===2026?['2026-11-20','2026-12-25']:[]);
- let days=0;
- for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
-  const wd=d.getDay(),key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-  if(wd!==0&&wd!==6&&!holidays.has(key))days++;
- }
+ const days=countSelectedPeriodBusinessDays();
  $('opDailyName').textContent=activeOperation;
  $('opDailyValue').textContent=days>0?f(Math.ceil(gap/days)):'0';
- $('opDailyDays').textContent=days+' dias úteis restantes até 31/12';
+ $('opDailyDays').textContent=days+' dias úteis no período selecionado';
 }
 function render(){let a=filtered(),base=a.reduce((s,x)=>s+n(x['META EDITAL']),0),ren=a.reduce((s,x)=>s+n(x['REAL META']),0),gap=base-ren,att=base?ren/base:0;simulator(a,base,ren);$('base').textContent=f(base);$('ren').textContent=f(ren);$('ating').textContent=pc(att);$('gap').textContent=(gap>0?'-':gap<0?'+':'')+f(Math.abs(gap));$('gap').style.color=gap>0?'#c43b32':'#07966b';
 let gr={};a.forEach(x=>{let k=x['REGIÃO']||'Não informada';gr[k]??={b:0,r:0};gr[k].b+=n(x['META EDITAL']);gr[k].r+=n(x['REAL META'])});$('regions').innerHTML=Object.entries(gr).map(([k,v])=>{let p=v.b?v.r/v.b:0;return `<div class="bar"><div class="barname">${k}</div><div class="track"><div class="fill" style="width:${Math.min(100,p*100)}%"></div></div><div class="barval">${pc(p)}</div></div>`}).join('')||'Sem dados';
@@ -430,7 +420,7 @@ $('hit100').innerHTML=hit.length?`<div class="hit100-list">${hit.map(x=>{let q=n
 a.sort((x,y)=>{let u=x[sort],v=y[sort];return (typeof u==='number'&&typeof v==='number'?u-v:String(u??'').localeCompare(String(v??''),'pt-BR',{numeric:true}))*dir});
 $('count').textContent=`${a.length} polo(s) exibido(s) de ${D.length}`;
 $('body').innerHTML=a.map(x=>{let p=n(x['% META'])||((n(x['META EDITAL'])?n(x['REAL META'])/n(x['META EDITAL']):0)),cl=p>=1?'ok':p>=.95?'warn':'bad';return `<tr><td>${f(x['CÓDIGO'])}</td><td><b>${x.POLO||'—'}</b></td><td class="num">${f(x['META EDITAL'])}</td><td class="num"><b>${f(x['REAL META'])}</b></td><td class="num"><span class="tag ${cl}">${pc(p)}</span></td><td class="num">${f(x['META MÓVEL'])}</td><td class="num">${pc(x['% META MÓVEL'])}</td><td class="num" style="font-weight:700;color:${n(x['GAP META'])>0?'#c43b32':'#16845b'}">${n(x['GAP META'])>0?'-':n(x['GAP META'])<0?'+':''}${f(Math.abs(n(x['GAP META'])))}</td><td>${x.UF||'—'}</td><td>${x['REGIÃO']||'—'}</td><td>${x['PORTE POLO']||'—'}</td><td>${x['SAFRA ABERTURA']||'—'}</td></tr>`}).join('')||'<tr><td colspan="12" style="padding:28px;text-align:center">Nenhum polo encontrado</td></tr>'}
-['code','polo','uf','reg','porte'].forEach(id=>$(id).addEventListener('change',render));$('simRate').addEventListener('input',render);$('simStartDate').addEventListener('change',()=>{if($('simEndDate').value&&$('simStartDate').value>$('simEndDate').value)$('simEndDate').value=$('simStartDate').value;render()});$('simEndDate').addEventListener('change',()=>{if($('simStartDate').value&&$('simEndDate').value<$('simStartDate').value)$('simStartDate').value=$('simEndDate').value;render()});$('reset').onclick=()=>{['code','polo','uf','reg','porte'].forEach(id=>$(id).value='');render()};document.querySelectorAll('th[data-k]').forEach(t=>t.onclick=()=>{if(sort===t.dataset.k)dir*=-1;else{sort=t.dataset.k;dir=1}render()});
+['code','polo','uf','reg','porte'].forEach(id=>$(id).addEventListener('change',render));$('simRate').addEventListener('input',render);$('simStartDate').addEventListener('change',()=>{if($('simEndDate').value&&$('simStartDate').value>$('simEndDate').value)$('simEndDate').value=$('simStartDate').value;updateConsolidatedDaily();updateOperationDaily();render()});$('simEndDate').addEventListener('change',()=>{if($('simStartDate').value&&$('simEndDate').value<$('simStartDate').value)$('simStartDate').value=$('simEndDate').value;updateConsolidatedDaily();updateOperationDaily();render()});$('reset').onclick=()=>{['code','polo','uf','reg','porte'].forEach(id=>$(id).value='');render()};document.querySelectorAll('th[data-k]').forEach(t=>t.onclick=()=>{if(sort===t.dataset.k)dir*=-1;else{sort=t.dataset.k;dir=1}render()});
 function switchOperation(which){activeOperation=which;D=which==='OPERAÇÃO I'?D1:D2;updateOperationDaily();['code','polo','uf','reg','porte'].forEach(id=>$(id).value='');refreshFilters();$('operationLabel').textContent=which;$('tabOp1').classList.toggle('active',which==='OPERAÇÃO I');$('tabOp2').classList.toggle('active',which==='OPERAÇÃO II');$('tabOp1').setAttribute('aria-selected',which==='OPERAÇÃO I');$('tabOp2').setAttribute('aria-selected',which==='OPERAÇÃO II');sort='POLO';dir=1;render()}
 $('tabOp1').onclick=()=>switchOperation('OPERAÇÃO I');$('tabOp2').onclick=()=>switchOperation('OPERAÇÃO II');updateOperationDaily();render();
 </script></body></html>
