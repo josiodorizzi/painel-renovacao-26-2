@@ -42,7 +42,18 @@ td{font-size:14px;padding:12px 11px}
 .op-tab{border:1px solid #d9c85d;background:#fff;padding:10px 22px;border-radius:10px;font-weight:850;color:#514600;cursor:pointer}
 .op-tab.active{background:#171717;color:#ffdf00;border-color:#171717;box-shadow:0 3px 10px #0002}
 @media(max-width:520px){.op-tab{flex:1}}
-</style></head><body>
+</style>
+<style id="ajustes-visuais-2026-11-17">
+body{font-size:16px!important}
+.eyebrow{font-size:13px!important}.subtitle{font-size:17px!important}
+.klabel,.knote,.count,.foot{font-size:15px!important}
+.field label{font-size:15px!important}.field input,.field select,button{font-size:16px!important}
+.title{font-size:19px!important}.desc{font-size:16px!important}
+.bar{font-size:16px!important}.gap-head{font-size:14px!important}.gap-row{font-size:16px!important}
+.tabletop{font-size:16px!important}table{font-size:16px!important}th{font-size:14px!important}td{font-size:16px!important}
+.tag{font-size:13px!important}.state-row{font-size:16px!important}.state-shape-loading{font-size:12px!important}
+</style>
+</head><body>
 <header><div class="brandrow"><div><div class="eyebrow">Operações Próprias • Painel gerencial</div><h1>RENOVAÇÃO 26/2 OPERAÇÕES PRÓPRIAS UNIASSELVI</h1><div class="subtitle"><span id="operationLabel">OPERAÇÃO I</span> • Acompanhamento da base edital, renovação e atingimento de metas</div></div><div><img class="brandlogo" src="https://portal.uniasselvi.com.br/public/img/site/logo-desk.webp" alt="UNIASSELVI" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div class="brandfallback" style="display:none">UNIASSELVI<small>CONSTRUA SUA PRÓPRIA HISTÓRIA</small></div></div></div></header>
 <main class="wrap">\n
 <div class="op-tabs" role="tablist" aria-label="Selecionar operação">
@@ -82,7 +93,7 @@ td{font-size:14px;padding:12px 11px}
 </div>
 </div>
 <div style="margin-top:14px;font-size:12px;color:#65738b">GAP projetado restante: <b id="simRemaining" style="color:#c43b32">—</b></div>
-</section>\n<section class="charts">
+</section><section class="charts">
 <div class="panel chart"><div class="title">Atingimento por região</div><div class="desc">Percentual de renovados sobre a base edital</div><div id="regions"></div></div>
 <div class="panel chart" style="grid-column:1/-1"><div class="title">Evolução por Estado</div><div class="desc">Atingimento consolidado por UF. Expanda cada estado para visualizar os resultados individuais dos polos.</div><div id="stateEvolution" class="state-accordions"></div></div>
 </section>
@@ -138,7 +149,7 @@ function simulator(rows,base,ren){
 }
 function render(){let a=filtered(),base=a.reduce((s,x)=>s+n(x['META EDITAL']),0),ren=a.reduce((s,x)=>s+n(x['REAL META']),0),gap=base-ren,att=base?ren/base:0;simulator(a,base,ren);$('base').textContent=f(base);$('ren').textContent=f(ren);$('ating').textContent=pc(att);$('gap').textContent=(gap>0?'-':gap<0?'+':'')+f(Math.abs(gap));$('gap').style.color=gap>0?'#c43b32':'#07966b';
 let gr={};a.forEach(x=>{let k=x['REGIÃO']||'Não informada';gr[k]??={b:0,r:0};gr[k].b+=n(x['META EDITAL']);gr[k].r+=n(x['REAL META'])});$('regions').innerHTML=Object.entries(gr).map(([k,v])=>{let p=v.b?v.r/v.b:0;return `<div class="bar"><div class="barname">${k}</div><div class="track"><div class="fill" style="width:${Math.min(100,p*100)}%"></div></div><div class="barval">${pc(p)}</div></div>`}).join('')||'Sem dados';
-let states={};a.forEach(x=>{let uf=x.UF||'Não informado';states[uf]??={base:0,ren:0,gap:0,polos:[]};states[uf].base+=n(x['META EDITAL']);states[uf].ren+=n(x['REAL META']);states[uf].gap+=n(x['GAP META']);states[uf].polos.push(x)});
+let states={};a.forEach(x=>{let uf=(x.UF||'Não informado').replace(/-+$/,'').trim();states[uf]??={base:0,ren:0,gap:0,polos:[]};states[uf].base+=n(x['META EDITAL']);states[uf].ren+=n(x['REAL META']);states[uf].gap+=n(x['GAP META']);states[uf].polos.push(x)});
 const stateShapeMarkup=uf=>`<div class="state-shape-holder" data-state-shape="${uf}"><span class="state-shape-loading">mapa</span></div>`;
 async function loadRealStateShapes(){
  try{
