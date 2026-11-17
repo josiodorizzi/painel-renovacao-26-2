@@ -331,8 +331,7 @@ $('ownOpsMeta').textContent=f(ownOpsMeta);
 $('ownOpsRenewed').textContent=f(ownOpsRenewed);
 $('ownOpsGap').textContent=(ownOpsGap>0?'-':ownOpsGap<0?'+':'')+f(Math.abs(ownOpsGap));
 $('ownOpsPercent').textContent=pc(ownOpsAttainment);
-$('ownOpsDaily').textContent=f(ownOpsDaily);
-$('ownOpsDays').textContent=ownOpsBusinessDays+' dias úteis restantes até 31/12';
+updateConsolidatedDaily();
 
 function fill(id,key){const el=$(id),first=el.options[0];el.innerHTML='';el.appendChild(first);[...new Set(D.map(x=>x[key]).filter(v=>v!==null&&v!==''))].sort((a,b)=>String(a).localeCompare(String(b),'pt-BR',{numeric:true})).forEach(v=>{let o=document.createElement('option');o.value=v;o.textContent=v;el.appendChild(o)})}
 function refreshFilters(){fill('code','CÓDIGO');fill('polo','POLO');fill('uf','UF');fill('reg','REGIÃO');fill('porte','PORTE POLO')}
