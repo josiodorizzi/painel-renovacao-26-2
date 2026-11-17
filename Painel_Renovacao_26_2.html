@@ -177,6 +177,11 @@ summary.state-row .muted{font-size:15px!important}
 .own-ops-kpis .own-ops-editable>span{font-size:15px}
 .own-ops-kpis .own-ops-editable input{font-size:26px}
 @media(max-width:650px){.own-ops-title{font-size:22px}.own-ops-kpis>div>span{font-size:14px}}
+
+.own-ops-kpis .own-alert-icon{color:#d93025;font-style:normal;font-size:23px;font-weight:950;text-shadow:0 0 0 #d93025}
+.own-ops-kpis .own-uni-logo{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:0;font-style:normal;color:#111;flex:0 0 auto}
+.own-ops-kpis .own-uni-logo svg{width:27px;height:20px;display:block}
+.own-ops-kpis .own-uni-logo b{font-size:5.5px;line-height:1;font-weight:950;letter-spacing:.35px;color:#111}
 </style>
 <style id="ajustes-visuais-2026-11-17">
 body{font-size:16px!important}
@@ -198,9 +203,9 @@ body{font-size:16px!important}
     <div class="own-ops-card own-meta"><span><i aria-hidden="true">🎯</i> Meta total</span><b id="ownOpsMeta">—</b></div>
     <div class="own-ops-card own-renewed"><span><i aria-hidden="true">🔄</i> Renovados</span><b id="ownOpsRenewed">—</b></div>
     <div class="own-ops-card own-percent"><span><i aria-hidden="true">📊</i> % de atingimento</span><b id="ownOpsPercent">—</b></div>
-    <div class="own-ops-card own-gap"><span><i aria-hidden="true">🚩</i> GAP para meta</span><b id="ownOpsGap">—</b></div>
+    <div class="own-ops-card own-gap"><span><i class="own-alert-icon" aria-hidden="true">⚠</i> GAP para meta</span><b id="ownOpsGap">—</b></div>
     <div class="own-ops-daily own-ops-card"><span><i aria-hidden="true">📅</i> Renovações necessárias por dia útil</span><b id="ownOpsDaily">—</b><small id="ownOpsDays">—</small></div>
-    <div class="own-ops-editable own-ops-card"><span><i aria-hidden="true">🏫</i> % UNIASSELVI</span><label><input id="ownOpsUniasselviPct" type="number" min="0" max="100" step="0.01" value="95.78" aria-label="Percentual UNIASSELVI"><b>%</b></label></div>
+    <div class="own-ops-editable own-ops-card"><span><i class="own-uni-logo" aria-label="Logo UNIASSELVI" role="img"><svg viewBox="0 0 40 27" xmlns="http://www.w3.org/2000/svg"><path d="M3 17.5C8 7 14 4 20 4s12 3 17 13.5M7 22C11 14.5 15.5 12 20 12s9 2.5 13 10M12 25c2.5-4 5.2-5.8 8-5.8s5.5 1.8 8 5.8" fill="none" stroke="#111" stroke-width="2.7" stroke-linecap="round"/></svg><b>UNIASSELVI</b></i> % UNIASSELVI</span><label><input id="ownOpsUniasselviPct" type="number" min="0" max="100" step="0.01" value="95.78" aria-label="Percentual UNIASSELVI"><b>%</b></label></div>
   </div>
 </section>
 <div class="op-tabs" role="tablist" aria-label="Selecionar operação">
