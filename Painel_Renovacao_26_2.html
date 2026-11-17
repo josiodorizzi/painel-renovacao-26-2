@@ -163,6 +163,20 @@ summary.state-row .muted{font-size:15px!important}
 @media(max-width:1100px){.own-ops-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:650px){.own-ops-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:420px){.own-ops-kpis{grid-template-columns:1fr}}
+
+/* Destaque visual dos cartões consolidados */
+.own-ops-title{font-size:25px;font-weight:950;letter-spacing:.015em}
+.own-ops-subtitle{font-size:14px}
+.own-ops-kpis>div{padding:13px 14px;min-height:100px}
+.own-ops-kpis>div>span{font-size:15px;line-height:1.35;font-weight:800;min-height:34px;display:flex;align-items:center;gap:7px}
+.own-ops-kpis>div>span i{font-style:normal;font-size:20px;line-height:1;flex:0 0 auto}
+.own-ops-kpis>div>b{font-size:27px;line-height:1.12}
+.own-ops-kpis .own-ops-daily>span{font-size:14px;min-height:34px}
+.own-ops-kpis .own-ops-daily>b{font-size:29px}
+.own-ops-kpis .own-ops-daily>small{font-size:11px}
+.own-ops-kpis .own-ops-editable>span{font-size:15px}
+.own-ops-kpis .own-ops-editable input{font-size:26px}
+@media(max-width:650px){.own-ops-title{font-size:22px}.own-ops-kpis>div>span{font-size:14px}}
 </style>
 <style id="ajustes-visuais-2026-11-17">
 body{font-size:16px!important}
@@ -181,12 +195,12 @@ body{font-size:16px!important}
   <div class="own-ops-title">OPERAÇÕES PRÓPRIAS</div>
   <div class="own-ops-subtitle">Resultado consolidado das Operações I e II</div>
   <div class="own-ops-kpis">
-    <div><span>Meta total</span><b id="ownOpsMeta">—</b></div>
-    <div><span>Renovados</span><b id="ownOpsRenewed">—</b></div>
-    <div><span>% de atingimento</span><b id="ownOpsPercent">—</b></div>
-    <div><span>GAP para meta</span><b id="ownOpsGap">—</b></div>
-    <div class="own-ops-daily"><span>Renovações necessárias por dia útil</span><b id="ownOpsDaily">—</b><small id="ownOpsDays">—</small></div>
-    <div class="own-ops-editable"><span>% UNIASSELVI</span><label><input id="ownOpsUniasselviPct" type="number" min="0" max="100" step="0.01" value="95.78" aria-label="Percentual UNIASSELVI"><b>%</b></label></div>
+    <div class="own-ops-card own-meta"><span><i aria-hidden="true">🎯</i> Meta total</span><b id="ownOpsMeta">—</b></div>
+    <div class="own-ops-card own-renewed"><span><i aria-hidden="true">🔄</i> Renovados</span><b id="ownOpsRenewed">—</b></div>
+    <div class="own-ops-card own-percent"><span><i aria-hidden="true">📊</i> % de atingimento</span><b id="ownOpsPercent">—</b></div>
+    <div class="own-ops-card own-gap"><span><i aria-hidden="true">🚩</i> GAP para meta</span><b id="ownOpsGap">—</b></div>
+    <div class="own-ops-daily own-ops-card"><span><i aria-hidden="true">📅</i> Renovações necessárias por dia útil</span><b id="ownOpsDaily">—</b><small id="ownOpsDays">—</small></div>
+    <div class="own-ops-editable own-ops-card"><span><i aria-hidden="true">🏫</i> % UNIASSELVI</span><label><input id="ownOpsUniasselviPct" type="number" min="0" max="100" step="0.01" value="95.78" aria-label="Percentual UNIASSELVI"><b>%</b></label></div>
   </div>
 </section>
 <div class="op-tabs" role="tablist" aria-label="Selecionar operação">
