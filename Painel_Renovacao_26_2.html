@@ -118,6 +118,11 @@ summary.state-row .muted{font-size:15px!important}
 #ownOpsPercent{color:#8a7100}
 @media(max-width:900px){.own-ops-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.own-ops-kpis{grid-template-columns:1fr}}
+
+.op-daily-card{display:flex;flex-direction:column;align-items:flex-start;gap:5px;padding:13px 18px;margin:12px 0 14px;background:#fff;border:1px solid #eadb8b;border-radius:12px;max-width:100%}
+.op-daily-label{font-size:14px;font-weight:750;color:#666153}
+.op-daily-value{font-size:29px;line-height:1.1;font-weight:900;color:#16845b;font-variant-numeric:tabular-nums}
+.op-daily-days{font-size:12px;color:#777}
 </style>
 <style id="ajustes-visuais-2026-11-17">
 body{font-size:16px!important}
@@ -153,6 +158,11 @@ body{font-size:16px!important}
 <div class="panel kpi"><div class="klabel">Renovados</div><div class="kvalue" id="ren">—</div><div class="knote">Coluna REAL META da planilha</div></div>
 <div class="panel kpi"><div class="klabel">Atingimento</div><div class="kvalue" id="ating">—</div><div class="knote">Renovados ÷ Base edital</div></div>
 <div class="panel kpi"><div class="klabel">GAP para meta</div><div class="kvalue" id="gap">—</div><div class="knote">Diferença entre base edital e renovados</div></div>
+</section>
+<section class="panel op-daily-card" aria-label="Projeção diária da operação selecionada">
+  <div class="op-daily-label">Renovações necessárias por dia útil — <b id="opDailyName">OPERAÇÃO I</b></div>
+  <div class="op-daily-value" id="opDailyValue">—</div>
+  <div class="op-daily-days" id="opDailyDays">—</div>
 </section>
 <section class="panel filters">
 <div class="field"><label>Código do polo</label><select id="code"><option value="">Todos os códigos</option></select></div>
@@ -258,6 +268,21 @@ function simulator(rows,base,ren){
  $('simPoles').textContent=projectedPoles+' / '+rows.length;
  $('simRemaining').textContent=f(remaining)+' renovações';
 }
+function updateOperationDaily(){
+ const meta=D.reduce((sum,x)=>sum+n(x['META EDITAL']),0);
+ const renewed=D.reduce((sum,x)=>sum+n(x['REAL META']),0);
+ const gap=Math.max(0,meta-renewed);
+ const now=new Date(),start=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1),end=new Date(now.getFullYear(),11,31);
+ const holidays=new Set(now.getFullYear()===2026?['2026-11-20','2026-12-25']:[]);
+ let days=0;
+ for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+  const wd=d.getDay(),key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  if(wd!==0&&wd!==6&&!holidays.has(key))days++;
+ }
+ $('opDailyName').textContent=activeOperation;
+ $('opDailyValue').textContent=days>0?f(Math.ceil(gap/days)):'0';
+ $('opDailyDays').textContent=days+' dias úteis restantes até 31/12';
+}
 function render(){let a=filtered(),base=a.reduce((s,x)=>s+n(x['META EDITAL']),0),ren=a.reduce((s,x)=>s+n(x['REAL META']),0),gap=base-ren,att=base?ren/base:0;simulator(a,base,ren);$('base').textContent=f(base);$('ren').textContent=f(ren);$('ating').textContent=pc(att);$('gap').textContent=(gap>0?'-':gap<0?'+':'')+f(Math.abs(gap));$('gap').style.color=gap>0?'#c43b32':'#07966b';
 let gr={};a.forEach(x=>{let k=x['REGIÃO']||'Não informada';gr[k]??={b:0,r:0};gr[k].b+=n(x['META EDITAL']);gr[k].r+=n(x['REAL META'])});$('regions').innerHTML=Object.entries(gr).map(([k,v])=>{let p=v.b?v.r/v.b:0;return `<div class="bar"><div class="barname">${k}</div><div class="track"><div class="fill" style="width:${Math.min(100,p*100)}%"></div></div><div class="barval">${pc(p)}</div></div>`}).join('')||'Sem dados';
 let states={};a.forEach(x=>{let uf=(x.UF||'Não informado').replace(/-+$/,'').trim();states[uf]??={base:0,ren:0,gap:0,polos:[]};states[uf].base+=n(x['META EDITAL']);states[uf].ren+=n(x['REAL META']);states[uf].gap+=n(x['GAP META']);states[uf].polos.push(x)});
@@ -295,6 +320,6 @@ a.sort((x,y)=>{let u=x[sort],v=y[sort];return (typeof u==='number'&&typeof v==='
 $('count').textContent=`${a.length} polo(s) exibido(s) de ${D.length}`;
 $('body').innerHTML=a.map(x=>{let p=n(x['% META'])||((n(x['META EDITAL'])?n(x['REAL META'])/n(x['META EDITAL']):0)),cl=p>=1?'ok':p>=.95?'warn':'bad';return `<tr><td>${f(x['CÓDIGO'])}</td><td><b>${x.POLO||'—'}</b></td><td class="num">${f(x['META EDITAL'])}</td><td class="num"><b>${f(x['REAL META'])}</b></td><td class="num"><span class="tag ${cl}">${pc(p)}</span></td><td class="num">${f(x['META MÓVEL'])}</td><td class="num">${pc(x['% META MÓVEL'])}</td><td class="num" style="font-weight:700;color:${n(x['GAP META'])>0?'#c43b32':'#16845b'}">${n(x['GAP META'])>0?'-':n(x['GAP META'])<0?'+':''}${f(Math.abs(n(x['GAP META'])))}</td><td>${x.UF||'—'}</td><td>${x['REGIÃO']||'—'}</td><td>${x['PORTE POLO']||'—'}</td><td>${x['SAFRA ABERTURA']||'—'}</td></tr>`}).join('')||'<tr><td colspan="12" style="padding:28px;text-align:center">Nenhum polo encontrado</td></tr>'}
 ['code','polo','uf','reg','porte'].forEach(id=>$(id).addEventListener('change',render));$('simRate').addEventListener('input',render);$('reset').onclick=()=>{['code','polo','uf','reg','porte'].forEach(id=>$(id).value='');render()};document.querySelectorAll('th[data-k]').forEach(t=>t.onclick=()=>{if(sort===t.dataset.k)dir*=-1;else{sort=t.dataset.k;dir=1}render()});
-function switchOperation(which){activeOperation=which;D=which==='OPERAÇÃO I'?D1:D2;['code','polo','uf','reg','porte'].forEach(id=>$(id).value='');refreshFilters();$('operationLabel').textContent=which;$('tabOp1').classList.toggle('active',which==='OPERAÇÃO I');$('tabOp2').classList.toggle('active',which==='OPERAÇÃO II');$('tabOp1').setAttribute('aria-selected',which==='OPERAÇÃO I');$('tabOp2').setAttribute('aria-selected',which==='OPERAÇÃO II');sort='POLO';dir=1;render()}
-$('tabOp1').onclick=()=>switchOperation('OPERAÇÃO I');$('tabOp2').onclick=()=>switchOperation('OPERAÇÃO II');render();
+function switchOperation(which){activeOperation=which;D=which==='OPERAÇÃO I'?D1:D2;updateOperationDaily();['code','polo','uf','reg','porte'].forEach(id=>$(id).value='');refreshFilters();$('operationLabel').textContent=which;$('tabOp1').classList.toggle('active',which==='OPERAÇÃO I');$('tabOp2').classList.toggle('active',which==='OPERAÇÃO II');$('tabOp1').setAttribute('aria-selected',which==='OPERAÇÃO I');$('tabOp2').setAttribute('aria-selected',which==='OPERAÇÃO II');sort='POLO';dir=1;render()}
+$('tabOp1').onclick=()=>switchOperation('OPERAÇÃO I');$('tabOp2').onclick=()=>switchOperation('OPERAÇÃO II');updateOperationDaily();render();
 </script></body></html>
