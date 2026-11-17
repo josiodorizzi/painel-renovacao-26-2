@@ -87,6 +87,19 @@ summary.state-row .muted{font-size:15px!important}
 .hit100-metrics{gap:12px;margin:10px 0 0 33px}
 .hit100-metrics small{font-size:12px}
 .hit100-metrics b{font-size:16px}
+
+/* Quatro polos por linha e tipografia ampliada */
+.hit100-list{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 14px}
+.hit100-item{padding:15px 16px;border-radius:12px}
+.hit100-heading{gap:11px}
+.hit100-icon{font-size:26px}
+.hit100-name{font-size:17px;font-weight:650}
+.hit100-pct{font-size:17px}
+.hit100-metrics{gap:14px;margin:12px 0 0 36px}
+.hit100-metrics small{font-size:13px}
+.hit100-metrics b{font-size:17px}
+@media(max-width:1050px){.hit100-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.hit100-list{grid-template-columns:1fr}}
 </style>
 <style id="ajustes-visuais-2026-11-17">
 body{font-size:16px!important}
