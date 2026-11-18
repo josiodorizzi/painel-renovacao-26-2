@@ -123,6 +123,25 @@ summary.state-row .muted{font-size:15px!important}
 .op-daily-label{font-size:14px;font-weight:750;color:#666153}
 .op-daily-value{font-size:29px;line-height:1.1;font-weight:900;color:#16845b;font-variant-numeric:tabular-nums}
 .op-daily-days{font-size:12px;color:#777}
+.op-overview-row{display:grid;grid-template-columns:minmax(220px,25%) minmax(0,1fr);gap:12px;align-items:stretch;margin:10px 0 12px}
+.op-overview-row .op-daily-card{width:100%;max-width:none;min-width:0;margin:0}
+.modality-panel{padding:12px 14px;min-width:0;background:linear-gradient(110deg,#fffdf2,#fff 72%)}
+.modality-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.modality-heading{font-size:13px;font-weight:900;letter-spacing:.04em;color:#514718}
+.modality-subtitle{font-size:10px;color:#777;margin-top:3px}
+.modality-buttons{display:flex;gap:6px;flex-wrap:wrap}
+.modality-btn{height:30px;padding:0 12px;border:1px solid #e8d98c;background:#fff;color:#6a5a12;border-radius:8px;font-size:10px;font-weight:850}
+.modality-btn.active{background:#ffdf00;border-color:#d4b900;color:#171717;box-shadow:0 2px 6px #d9b90035}
+.modality-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+.modality-metric{background:#fff;border:1px solid #eee4b4;border-radius:9px;padding:8px 10px;min-width:0}
+.modality-metric span{display:block;font-size:9px;font-weight:850;letter-spacing:.04em;color:#77705a}
+.modality-metric b{display:block;font-size:20px;line-height:1.2;margin:4px 0;color:#242424}
+.modality-metric small{display:block;font-size:9px;color:#8a8577;white-space:normal}
+.modality-name{font-style:normal;font-weight:800}
+.modality-foot{font-size:9px;color:#928b75;margin-top:7px}
+@media(max-width:900px){.op-overview-row{grid-template-columns:1fr}.op-overview-row .op-daily-card{width:100%;max-width:100%}.modality-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.modality-top{align-items:flex-start}.modality-buttons{width:100%}.modality-btn{flex:1;padding:0 6px}}
+
 
 .op-daily-label{font-size:12px}
 .op-daily-value{font-size:25px}
@@ -245,11 +264,28 @@ body{font-size:16px!important}
 <div class="panel kpi"><div class="klabel">Atingimento</div><div class="kvalue" id="ating">—</div><div class="knote">Renovados ÷ Base edital</div></div>
 <div class="panel kpi"><div class="klabel">GAP para meta</div><div class="kvalue" id="gap">—</div><div class="knote">Diferença entre base edital e renovados</div></div>
 </section>
+<div class="op-overview-row">
 <section class="panel op-daily-card" aria-label="Projeção diária da operação selecionada">
   <div class="op-daily-label">Renovações necessárias por dia útil — <b id="opDailyName">OPERAÇÃO I</b></div>
   <div class="op-daily-value" id="opDailyValue">—</div>
   <div class="op-daily-days" id="opDailyDays">—</div>
 </section>
+<section class="panel modality-panel" aria-label="Indicadores por modalidade">
+  <div class="modality-top"><div><div class="modality-heading">RESULTADOS POR MODALIDADE</div><div class="modality-subtitle">Selecione uma categoria para visualizar os indicadores da <b id="modalityOperation">OPERAÇÃO I</b></div></div>
+  <div class="modality-buttons" role="group" aria-label="Modalidades">
+    <button type="button" class="modality-btn active" data-modality="CALOUROS">CALOUROS</button>
+    <button type="button" class="modality-btn" data-modality="VETERANOS">VETERANOS</button>
+    <button type="button" class="modality-btn" data-modality="WINBACK">WINBACK</button>
+  </div></div>
+  <div class="modality-metrics">
+    <div class="modality-metric"><span>META</span><b>—</b><small>Aguardando base de <i class="modality-name">CALOUROS</i></small></div>
+    <div class="modality-metric"><span>RENOVADOS</span><b>—</b><small>Aguardando base de <i class="modality-name">CALOUROS</i></small></div>
+    <div class="modality-metric"><span>% DE ATINGIMENTO</span><b>—</b><small>Renovados ÷ Meta</small></div>
+    <div class="modality-metric"><span>GAP PARA META</span><b>—</b><small>Meta menos renovados</small></div>
+  </div>
+  <div class="modality-foot">Prévia visual — os indicadores serão preenchidos quando a base por modalidade estiver disponível.</div>
+</section>
+</div>
 <section class="panel filters">
 <div class="field"><label>Código do polo</label><select id="code"><option value="">Todos os códigos</option></select></div>
 <div class="field"><label>Nome do polo</label><select id="polo"><option value="">Todos os polos</option></select></div>
@@ -422,7 +458,14 @@ $('hit100').innerHTML=hit.length?`<div class="hit100-list">${hit.map(x=>{let q=n
 a.sort((x,y)=>{let u=x[sort],v=y[sort];return (typeof u==='number'&&typeof v==='number'?u-v:String(u??'').localeCompare(String(v??''),'pt-BR',{numeric:true}))*dir});
 $('count').textContent=`${a.length} polo(s) exibido(s) de ${D.length}`;
 $('body').innerHTML=a.map(x=>{let p=n(x['% META'])||((n(x['META EDITAL'])?n(x['REAL META'])/n(x['META EDITAL']):0)),cl=p>=1?'ok':p>=.95?'warn':'bad';return `<tr><td>${f(x['CÓDIGO'])}</td><td><b>${x.POLO||'—'}</b></td><td class="num">${f(x['META EDITAL'])}</td><td class="num"><b>${f(x['REAL META'])}</b></td><td class="num"><span class="tag ${cl}">${pc(p)}</span></td><td class="num">${f(x['META MÓVEL'])}</td><td class="num">${pc(x['% META MÓVEL'])}</td><td class="num" style="font-weight:700;color:${n(x['GAP META'])>0?'#c43b32':'#16845b'}">${n(x['GAP META'])>0?'-':n(x['GAP META'])<0?'+':''}${f(Math.abs(n(x['GAP META'])))}</td><td>${x.UF||'—'}</td><td>${x['REGIÃO']||'—'}</td><td>${x['PORTE POLO']||'—'}</td><td>${x['SAFRA ABERTURA']||'—'}</td><td><input class="action-plan-input" type="text" maxlength="150" placeholder="Descreva o plano de ação..." data-plan-key="${encodeURIComponent(activeOperation+"|"+String(x['CÓDIGO']??x.POLO))}" value="${escapeAttr(getActionPlan(activeOperation,x))}" aria-label="Plano de ação para ${escapeAttr(x.POLO)}"></td></tr>`}).join('')||'<tr><td colspan="13" style="padding:28px;text-align:center">Nenhum polo encontrado</td></tr>'}
+let activeModality='CALOUROS';
+document.querySelectorAll('.modality-btn').forEach(btn=>btn.addEventListener('click',()=>{
+ activeModality=btn.dataset.modality;
+ document.querySelectorAll('.modality-btn').forEach(b=>b.classList.toggle('active',b===btn));
+ document.querySelectorAll('.modality-name').forEach(el=>el.textContent=activeModality);
+ document.querySelectorAll('.modality-metric small').forEach((el,i)=>{if(i<2)el.textContent='Aguardando base de '+activeModality});
+}));
 $('body').addEventListener('input',e=>{if(e.target.classList.contains('action-plan-input')){const key='planacao:'+activeOperation+':'+decodeURIComponent(e.target.dataset.planKey).split('|').slice(1).join('|');try{localStorage.setItem(key,e.target.value.slice(0,150))}catch(err){}}});['code','polo','uf','reg','porte'].forEach(id=>$(id).addEventListener('change',render));$('simRate').addEventListener('input',render);$('simStartDate').addEventListener('change',()=>{if($('simEndDate').value&&$('simStartDate').value>$('simEndDate').value)$('simEndDate').value=$('simStartDate').value;updateConsolidatedDaily();updateOperationDaily();render()});$('simEndDate').addEventListener('change',()=>{if($('simStartDate').value&&$('simEndDate').value<$('simStartDate').value)$('simStartDate').value=$('simEndDate').value;updateConsolidatedDaily();updateOperationDaily();render()});$('reset').onclick=()=>{['code','polo','uf','reg','porte'].forEach(id=>$(id).value='');render()};document.querySelectorAll('th[data-k]').forEach(t=>t.onclick=()=>{if(sort===t.dataset.k)dir*=-1;else{sort=t.dataset.k;dir=1}render()});
-function switchOperation(which){activeOperation=which;D=which==='OPERAÇÃO I'?D1:D2;updateOperationDaily();['code','polo','uf','reg','porte'].forEach(id=>$(id).value='');refreshFilters();$('operationLabel').textContent=which;$('tabOp1').classList.toggle('active',which==='OPERAÇÃO I');$('tabOp2').classList.toggle('active',which==='OPERAÇÃO II');$('tabOp1').setAttribute('aria-selected',which==='OPERAÇÃO I');$('tabOp2').setAttribute('aria-selected',which==='OPERAÇÃO II');sort='POLO';dir=1;render()}
+function switchOperation(which){activeOperation=which;D=which==='OPERAÇÃO I'?D1:D2;$('modalityOperation').textContent=which;updateOperationDaily();['code','polo','uf','reg','porte'].forEach(id=>$(id).value='');refreshFilters();$('operationLabel').textContent=which;$('tabOp1').classList.toggle('active',which==='OPERAÇÃO I');$('tabOp2').classList.toggle('active',which==='OPERAÇÃO II');$('tabOp1').setAttribute('aria-selected',which==='OPERAÇÃO I');$('tabOp2').setAttribute('aria-selected',which==='OPERAÇÃO II');sort='POLO';dir=1;render()}
 $('tabOp1').onclick=()=>switchOperation('OPERAÇÃO I');$('tabOp2').onclick=()=>switchOperation('OPERAÇÃO II');updateOperationDaily();updateConsolidatedDaily();render();
 </script></body></html>
