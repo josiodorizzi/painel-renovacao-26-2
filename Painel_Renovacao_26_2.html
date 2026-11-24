@@ -288,13 +288,12 @@ body{font-size:16px!important}
     <button type="button" class="modality-btn" data-modality="WINBACK">WINBACK</button>
   </div></div>
   <div class="modality-metrics">
-    <div class="modality-metric"><span>META</span><b>—</b><small>Aguardando base de <i class="modality-name">CALOUROS</i></small></div>
-    <div class="modality-metric"><span>RENOVADOS</span><b>—</b><small>Aguardando base de <i class="modality-name">CALOUROS</i></small></div>
-    <div class="modality-metric"><span>% DE ATINGIMENTO</span><b>—</b><small>Renovados ÷ Meta</small></div>
-    <div class="modality-metric"><span>GAP PARA META</span><b>—</b><small>Meta menos renovados</small></div>
+    <div class="modality-metric"><span>META</span><b id="modalityMeta">—</b><small>Base prevista de <i class="modality-name">CALOUROS</i></small></div>
+    <div class="modality-metric"><span>RENOVADOS</span><b id="modalityRenewed">—</b><small>Realizado em <i class="modality-name">CALOUROS</i></small></div>
+    <div class="modality-metric"><span>% DE ATINGIMENTO</span><b id="modalityPercent">—</b><small>Renovados ÷ Meta</small></div>
+    <div class="modality-metric"><span>GAP PARA META</span><b id="modalityGap">—</b><small>Meta menos renovados</small></div>
   </div>
-  <div class="modality-foot">Prévia visual — os indicadores serão preenchidos quando a base por modalidade estiver disponível.</div>
-</section>
+  <div class="modality-foot" id="modalityFoot">Base por modalidade — 54 polos</div></section>
 </div>
 <section class="panel filters">
 <div class="field"><label>Código do polo</label><select id="code"><option value="">Todos os códigos</option></select></div>
@@ -468,14 +467,35 @@ $('hit100').innerHTML=hit.length?`<div class="hit100-list">${hit.map(x=>{let q=n
 a.sort((x,y)=>{let u=x[sort],v=y[sort];return (typeof u==='number'&&typeof v==='number'?u-v:String(u??'').localeCompare(String(v??''),'pt-BR',{numeric:true}))*dir});
 $('count').textContent=`${a.length} polo(s) exibido(s) de ${D.length}`;
 $('body').innerHTML=a.map(x=>{let p=n(x['% META'])||((n(x['META EDITAL'])?n(x['REAL META'])/n(x['META EDITAL']):0)),cl=p>=1?'ok':p>=.95?'warn':'bad';return `<tr><td>${f(x['CÓDIGO'])}</td><td><b>${x.POLO||'—'}</b></td><td class="num">${f(x['META EDITAL'])}</td><td class="num"><b>${f(x['REAL META'])}</b></td><td class="num"><span class="tag ${cl}">${pc(p)}</span></td><td class="num">${f(x['META MÓVEL'])}</td><td class="num">${pc(x['% META MÓVEL'])}</td><td class="num" style="font-weight:700;color:${n(x['GAP META'])>0?'#c43b32':'#16845b'}">${n(x['GAP META'])>0?'-':n(x['GAP META'])<0?'+':''}${f(Math.abs(n(x['GAP META'])))}</td><td>${x.UF||'—'}</td><td>${x['REGIÃO']||'—'}</td><td>${x['PORTE POLO']||'—'}</td><td>${x['SAFRA ABERTURA']||'—'}</td><td><input class="action-plan-input" type="text" maxlength="150" placeholder="Descreva o plano de ação..." data-plan-key="${encodeURIComponent(activeOperation+"|"+String(x['CÓDIGO']??x.POLO))}" value="${escapeAttr(getActionPlan(activeOperation,x))}" aria-label="Plano de ação para ${escapeAttr(x.POLO)}"></td></tr>`}).join('')||'<tr><td colspan="13" style="padding:28px;text-align:center">Nenhum polo encontrado</td></tr>'}
+const MODALITY_TOTALS={
+ VETERANOS:{meta:21984,renovados:18881},
+ WINBACK:{meta:1909,renovados:775},
+ CALOUROS:{meta:13263,renovados:9350}
+};
 let activeModality='CALOUROS';
+function renderModality(){
+ document.querySelectorAll('.modality-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.modality===activeModality));
+ document.querySelectorAll('.modality-name').forEach(el=>el.textContent=activeModality);
+ const ids=['modalityMeta','modalityRenewed','modalityPercent','modalityGap'];
+ if(activeOperation!=='OPERAÇÃO I'){
+  ids.forEach(id=>$(id).textContent='—');
+  $('modalityFoot').textContent='Base por modalidade ainda não disponibilizada para '+activeOperation+'.';
+  return;
+ }
+ const totals=MODALITY_TOTALS[activeModality],gap=totals.meta-totals.renovados;
+ $('modalityMeta').textContent=f(totals.meta);
+ $('modalityRenewed').textContent=f(totals.renovados);
+ $('modalityPercent').textContent=pc(totals.meta?totals.renovados/totals.meta:0);
+ $('modalityGap').textContent=(gap>0?'-':gap<0?'+':'')+f(Math.abs(gap));
+ $('modalityGap').style.color=gap>0?'#c43b32':'#16845b';
+ $('modalityFoot').textContent='Consolidado de 54 polos • Base enviada em BASE VETERANOS.csv';
+}
 document.querySelectorAll('.modality-btn').forEach(btn=>btn.addEventListener('click',()=>{
  activeModality=btn.dataset.modality;
- document.querySelectorAll('.modality-btn').forEach(b=>b.classList.toggle('active',b===btn));
- document.querySelectorAll('.modality-name').forEach(el=>el.textContent=activeModality);
- document.querySelectorAll('.modality-metric small').forEach((el,i)=>{if(i<2)el.textContent='Aguardando base de '+activeModality});
+ renderModality();
 }));
+renderModality();
 $('body').addEventListener('input',e=>{if(e.target.classList.contains('action-plan-input')){const key='planacao:'+activeOperation+':'+decodeURIComponent(e.target.dataset.planKey).split('|').slice(1).join('|');try{localStorage.setItem(key,e.target.value.slice(0,150))}catch(err){}}});['code','polo','uf','reg','porte'].forEach(id=>$(id).addEventListener('change',render));$('simRate').addEventListener('input',render);$('simStartDate').addEventListener('change',()=>{if($('simEndDate').value&&$('simStartDate').value>$('simEndDate').value)$('simEndDate').value=$('simStartDate').value;updateConsolidatedDaily();updateOperationDaily();render()});$('simEndDate').addEventListener('change',()=>{if($('simStartDate').value&&$('simEndDate').value<$('simStartDate').value)$('simStartDate').value=$('simEndDate').value;updateConsolidatedDaily();updateOperationDaily();render()});$('reset').onclick=()=>{['code','polo','uf','reg','porte'].forEach(id=>$(id).value='');render()};document.querySelectorAll('th[data-k]').forEach(t=>t.onclick=()=>{if(sort===t.dataset.k)dir*=-1;else{sort=t.dataset.k;dir=1}render()});
-function switchOperation(which){activeOperation=which;D=which==='OPERAÇÃO I'?D1:D2;$('modalityOperation').textContent=which;updateOperationDaily();['code','polo','uf','reg','porte'].forEach(id=>$(id).value='');refreshFilters();$('operationLabel').textContent=which;$('tabOp1').classList.toggle('active',which==='OPERAÇÃO I');$('tabOp2').classList.toggle('active',which==='OPERAÇÃO II');$('tabOp1').setAttribute('aria-selected',which==='OPERAÇÃO I');$('tabOp2').setAttribute('aria-selected',which==='OPERAÇÃO II');sort='POLO';dir=1;render()}
+function switchOperation(which){activeOperation=which;D=which==='OPERAÇÃO I'?D1:D2;$('modalityOperation').textContent=which;renderModality();updateOperationDaily();['code','polo','uf','reg','porte'].forEach(id=>$(id).value='');refreshFilters();$('operationLabel').textContent=which;$('tabOp1').classList.toggle('active',which==='OPERAÇÃO I');$('tabOp2').classList.toggle('active',which==='OPERAÇÃO II');$('tabOp1').setAttribute('aria-selected',which==='OPERAÇÃO I');$('tabOp2').setAttribute('aria-selected',which==='OPERAÇÃO II');sort='POLO';dir=1;render()}
 $('tabOp1').onclick=()=>switchOperation('OPERAÇÃO I');$('tabOp2').onclick=()=>switchOperation('OPERAÇÃO II');updateOperationDaily();updateConsolidatedDaily();render();
 </script></body></html>
