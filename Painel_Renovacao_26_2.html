@@ -468,27 +468,34 @@ a.sort((x,y)=>{let u=x[sort],v=y[sort];return (typeof u==='number'&&typeof v==='
 $('count').textContent=`${a.length} polo(s) exibido(s) de ${D.length}`;
 $('body').innerHTML=a.map(x=>{let p=n(x['% META'])||((n(x['META EDITAL'])?n(x['REAL META'])/n(x['META EDITAL']):0)),cl=p>=1?'ok':p>=.95?'warn':'bad';return `<tr><td>${f(x['CÓDIGO'])}</td><td><b>${x.POLO||'—'}</b></td><td class="num">${f(x['META EDITAL'])}</td><td class="num"><b>${f(x['REAL META'])}</b></td><td class="num"><span class="tag ${cl}">${pc(p)}</span></td><td class="num">${f(x['META MÓVEL'])}</td><td class="num">${pc(x['% META MÓVEL'])}</td><td class="num" style="font-weight:700;color:${n(x['GAP META'])>0?'#c43b32':'#16845b'}">${n(x['GAP META'])>0?'-':n(x['GAP META'])<0?'+':''}${f(Math.abs(n(x['GAP META'])))}</td><td>${x.UF||'—'}</td><td>${x['REGIÃO']||'—'}</td><td>${x['PORTE POLO']||'—'}</td><td>${x['SAFRA ABERTURA']||'—'}</td><td><input class="action-plan-input" type="text" maxlength="150" placeholder="Descreva o plano de ação..." data-plan-key="${encodeURIComponent(activeOperation+"|"+String(x['CÓDIGO']??x.POLO))}" value="${escapeAttr(getActionPlan(activeOperation,x))}" aria-label="Plano de ação para ${escapeAttr(x.POLO)}"></td></tr>`}).join('')||'<tr><td colspan="13" style="padding:28px;text-align:center">Nenhum polo encontrado</td></tr>'}
 const MODALITY_TOTALS={
- VETERANOS:{meta:21984,renovados:18881},
- WINBACK:{meta:1909,renovados:775},
- CALOUROS:{meta:13263,renovados:9350}
+ 'OPERAÇÃO I':{
+  VETERANOS:{meta:21984,renovados:18881},
+  WINBACK:{meta:1909,renovados:775},
+  CALOUROS:{meta:13263,renovados:9350}
+ },
+ 'OPERAÇÃO II':{
+  VETERANOS:{meta:15567,renovados:13698},
+  WINBACK:{meta:971,renovados:407},
+  CALOUROS:{meta:9529,renovados:6802}
+ }
 };
 let activeModality='CALOUROS';
 function renderModality(){
  document.querySelectorAll('.modality-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.modality===activeModality));
  document.querySelectorAll('.modality-name').forEach(el=>el.textContent=activeModality);
- const ids=['modalityMeta','modalityRenewed','modalityPercent','modalityGap'];
- if(activeOperation!=='OPERAÇÃO I'){
-  ids.forEach(id=>$(id).textContent='—');
-  $('modalityFoot').textContent='Base por modalidade ainda não disponibilizada para '+activeOperation+'.';
+ const totals=MODALITY_TOTALS[activeOperation]?.[activeModality];
+ if(!totals){
+  ['modalityMeta','modalityRenewed','modalityPercent','modalityGap'].forEach(id=>$(id).textContent='—');
+  $('modalityFoot').textContent='Dados da modalidade não disponíveis para '+activeOperation+'.';
   return;
  }
- const totals=MODALITY_TOTALS[activeModality],gap=totals.meta-totals.renovados;
+ const gap=totals.meta-totals.renovados;
  $('modalityMeta').textContent=f(totals.meta);
  $('modalityRenewed').textContent=f(totals.renovados);
  $('modalityPercent').textContent=pc(totals.meta?totals.renovados/totals.meta:0);
  $('modalityGap').textContent=(gap>0?'-':gap<0?'+':'')+f(Math.abs(gap));
  $('modalityGap').style.color=gap>0?'#c43b32':'#16845b';
- $('modalityFoot').textContent='Consolidado de 54 polos • Base enviada em BASE VETERANOS.csv';
+ $('modalityFoot').textContent=activeOperation==='OPERAÇÃO II'?'Consolidado de 50 polos • Base enviada em BASE VETERANOS OP II.csv':'Consolidado de 54 polos • Base enviada em BASE VETERANOS.csv';
 }
 document.querySelectorAll('.modality-btn').forEach(btn=>btn.addEventListener('click',()=>{
  activeModality=btn.dataset.modality;
